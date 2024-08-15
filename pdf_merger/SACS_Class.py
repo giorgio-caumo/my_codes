@@ -74,10 +74,10 @@ class SACSReader:
         which is not the user name convention
 
         Args:
-            database_file (Path): Path to the databse
+            cursor
 
         Returns:
-            Tuple: connection and cursor
+            df: Dataframe for mapping IDs
         """
         # Find the joint name ordered depending on the ID given by the db
         cursor.execute("SELECT ID, JointName FROM R_JOINT")
@@ -91,6 +91,15 @@ class SACSReader:
         return df
 
     def get_member_name(cursor):
+        ""Obtain the Member names 
+
+        Args:
+            cursor
+
+        Returns:
+            df: Dataframe for mapping Members
+        """
+        
         # Find the member name ordered depending on the ID given by the db
         cursor.execute("SELECT MemberName, ID FROM R_POSTMEMBERRESULTS")
         # Fetch all rows from the query
@@ -105,11 +114,10 @@ class SACSReader:
 
         Args:
             cursor (_type_): cursor to the SACS databse
-            joint_names (pd.Dataframe): _description_
-            selected_joints (_type_, optional): _description_. Defaults to None.
+            selected_joints (_type_, optional): Selection of Joints if the user wants specific ones
 
         Returns:
-            _type_: _description_
+            None
         """
         # Get the selection if present
         selected_joints = self.selected_joints
@@ -135,21 +143,20 @@ class SACSReader:
         if selected_joints is not None:
             df_selected_joints = df[df['Joint ID'].isin(selected_joints)]
             self.fixed_joint_reactions = df_selected_joints
-            # return df_selected_joints
+            
         else:
             self.fixed_joint_reactions = df
-            # return df
+            
 
     def get_joint_spring_forces(self, cursor, selected_joints=None) -> pd.DataFrame:
         """Get the spring joint reactions
 
         Args:
             cursor (_type_): cursor to the SACS databse
-            joint_names (pd.Dataframe): from self function
-            selected_joints (_type_, optional): _description_. Defaults to None.
+            selected_joints (_type_, optional): Selection of Joints if the user wants specific ones
 
         Returns:
-            spring_forces: spring forces saved in the class
+            None
         """
         # Get the selection if present
         selected_joints = self.selected_joints
@@ -184,14 +191,14 @@ class SACSReader:
     def get_member_end_forces(self, cursor,  selected_members=None) -> pd.DataFrame:
         """Get the fixed joint reaction
 
-                        Args:
-                            cursor (_type_): cursor to the SACS databse
-                            member_names (pd.Dataframe): _description_
-                            selected_members (_type_, optional): _description_. Defaults to None.
+            Args:
+                cursor (_type_): cursor to the SACS databse
+                member_names (pd.Dataframe): _description_
+                selected_members (_type_, optional): _description_. Defaults to None.
 
-                        Returns:
-                            _type_: _description_
-                        """
+            Returns:
+                _type_: _description_
+        """
         # Get the selection if present
         selected_members = self.selected_members
 
@@ -341,48 +348,6 @@ class SACSReader:
         self.get_member_UC(cursor)
 
         self.close_database()
-
-    # def save_results_to_excel_without_name(self, sheet_name, df):
-    #     excel_file_path = self.excel_file_path
-    #     try:
-    #         # Load the existing Excel file
-    #         wb = load_workbook(excel_file_path)
-    #
-    #         # Check if the sheet exists
-    #         if sheet_name in wb.sheetnames:
-    #             # Get the existing sheet
-    #             ws = wb[sheet_name]
-    #
-    #             # Clear all existing rows in the sheet (including the header row)
-    #             for row in list(ws.iter_rows()):
-    #                 ws.delete_rows(idx=row[0].row, amount=1)
-    #
-    #         else:
-    #             # If the sheet doesn't exist, create a new one
-    #             ws = wb.create_sheet(sheet_name)
-    #
-    #         # # Create title cell
-    #         # end_column = len(df.columns)
-    #         # title_range = f'A1:{end_column}1'
-    #         # ws.merge_cells(title_range)
-    #         print()
-    #
-    #         # Convert the DataFrame to a worksheet (adding data from scratch)
-    #         header = list(df.columns)  # Get the header from the DataFrame
-    #         ws.append(header)  # Write the header to the sheet
-    #
-    #         for idx, row in df.iterrows():
-    #             row_data = list(row)
-    #             ws.append(row_data)
-    #
-    #         # Save the changes to the existing Excel file
-    #         wb.save(excel_file_path)
-    #         print(f"Data updated in '{sheet_name}' sheet.")
-    #     except FileNotFoundError:
-    #         # If the file doesn't exist, create a new Excel file
-    #         with pd.ExcelWriter(excel_file_path, engine='openpyxl') as writer:
-    #             df.to_excel(writer, sheet_name=sheet_name, index=False)
-    #         print(f"Excel file '{excel_file_path}' created with '{sheet_name}' sheet.")
 
     def save_results_to_excel(self, sheet_name, df):
         excel_file_path = self.excel_file_path
@@ -749,12 +714,10 @@ class SACSReader:
 if __name__ == "__main__":
 
     # THISDIR = Path(__file__).parent
-    # excel_file = os.path.join(THISDIR, 'SACS output_TEST.xlsx')
+    excel_file = os.path.join(THISDIR, 'SACS output_TEST.xlsx')
 
-    database_file = [r'P:\CP0591\CP0591-Engineering\MI500 - MP Equipment Support Design\MI500-RP05 - Hammer Vertical G&S Design\Hammer Survival\[05] SACS\01 No Re-use\01 Heavy sleeve - 400\Operational\sacsdb.post',
-                 r'P:\CP0591\CP0591-Engineering\MI500 - MP Equipment Support Design\MI500-RP05 - Hammer Vertical G&S Design\Hammer Survival\[05] SACS\01 No Re-use\01 Heavy sleeve - 400\Spare\sacsdb.post']
-
-    excel_file = r'P:\CP0591\CP0591-Engineering\MI500 - MP Equipment Support Design\MI500-RP05 - Hammer Vertical G&S Design\Hammer Survival\[05] SACS\SACS output_TEST.xlsx'
+    database_file = [r'Operational\sacsdb.post',
+                 r'Spare\sacsdb.post']
 
     selected_joints = None
     selected_members = ['SD01-TOG', 'SD02-TOG', 'SD03-TOG', 'SD04-TOG', 'SD05-TOG', 'SD06-TOG', 'SD07-TOG', 'SD08-TOG',
@@ -763,41 +726,4 @@ if __name__ == "__main__":
                             ]
     index = ["Operational", "Spare"]
 
-    post_process_data = []
-
-    ii = 0
-    for i_database in database_file:
-        sacs_output = SACSReader(index=index[ii], database_file=i_database, selected_joints=selected_joints,
-                             selected_members=selected_members, excel_file_path=excel_file)
-
-        sacs_output.get_data()
-
-        sacs_output.export_to_excel(selection='Fixed Joint Reactions')
-        sacs_output.export_to_excel(selection='Spring Joint Forces')
-        sacs_output.export_to_excel(selection='Member End Forces')
-        # sacs_output.export_to_excel(selection='Member UC')
-
-        # Post processing
-        df_1 = sacs_output.post_process_fixed_reactions(selection='Max', direction='X', selected_joints=None)
-        df_2 = sacs_output.post_process_member_forces(selection='Max', direction='Z',
-                                                  selected_members=['SD01-TOG', 'SD02-TOG', 'SD03-TOG', 'SD04-TOG',
-                                                                    'SD05-TOG', 'SD06-TOG', 'SD07-TOG', 'SD08-TOG'])
-        df_3 = sacs_output.post_process_fixed_reactions(selection='Min', direction='Y', selected_joints=None)
-
-        # Append each DataFrame to the post_process_data list
-        post_process_data.append(df_1)
-        post_process_data.append(df_2)
-        post_process_data.append(df_3)
-
-        # Concatenate all DataFrames in the post_process_data list
-        summary_df = pd.concat(post_process_data, ignore_index=True)
-        # Save the concatenated DataFrame to Excel
-        sheet_name = f"Summary - {index[ii]}"
-        sacs_output.save_results_to_excel(sheet_name = sheet_name, df = summary_df)
-        # Export the PDF
-        sacs_output.export_to_pdf_styled()
-        # Clear the post_process_data list for the next iteration
-        post_process_data.clear()
-
-        ii+=1
 
