@@ -2,10 +2,9 @@ import pandas as pd
 from SACS_output_v3 import SACSReader
 
 # THISDIR = Path(__file__).parent
-excel_file = r'C:\Users\giorgioc\OneDrive - Heerema Marine Contractors Nederland SE\Desktop\New folder\SACS output_TEST.xlsx'
+excel_file = r'SACS output_TEST.xlsx'
 
-database_file = [r'C:\Users\giorgioc\OneDrive - Heerema Marine Contractors Nederland SE\Desktop\New folder\OP\01 Grillage\Main pile\sacsdb.post']
-
+database_file = [r'Main pile\sacsdb.post']
 
 
 selected_joints = None
